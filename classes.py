@@ -154,7 +154,7 @@ class Game:
         if test_word in self.word_dictionary:
             print("valid word")
         else:
-            print("not valid word")
+            print("that's not a valid word")
 
     def end(self):
         """TODO:Keep stats in json file"""
