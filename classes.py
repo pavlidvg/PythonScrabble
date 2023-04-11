@@ -52,7 +52,7 @@ class Player:
             for letter in word:
                 self.letters.remove(letter) #remove the letters from player
 
-            self.letters = self.letters + sak.getletters(len(word))
+            self.letters = self.letters + sak.getletters(len(word))#adding letters
 
 
 
@@ -101,16 +101,21 @@ class Human(Player):
 
     def __init__(self,name,score):
         Player.__init__(self,name,score)
-    def play_word(self,word: str,sak: SakClass):
+    def play_word(self,dictionary,word: str,sak: SakClass):
         """TODO: ASSUME PLAYER PLAYS CORRECTLY FOR NOW, CHECK DISTIONARY LATER"""
+        if word in dictionary:#DO:and the the player has the letters that he used
+            print("valid word")
+        else:
+            print("that's not a valid word")
         Player.play_word(self,word,sak)
 
 
-    def play(self,word: str,sak: SakClass):
+    def play(self,dictionary,sak: SakClass):
         """TODO: this method should simulate how the player plays (e.g. inputs)"""
         print("play of human")
         print("Player:",self.name,self.letters)
-        self.play_word("ONE",sak)
+        word = input("Πες λέξη:")
+        self.play_word(dictionary,word,sak)
         print(self.letters)
 
 
@@ -149,12 +154,9 @@ class Game:
         print("computer= ",self.player2.letters)
         WORD = self.player2.play(self.word_dictionary,2)
         print("computers choice is",WORD)
-        test_word = input("Πες λέξη:")
+        #in play() for human
+        self.player1.play(self.word_dictionary,self.sakoulaki)
 
-        if test_word in self.word_dictionary:
-            print("valid word")
-        else:
-            print("that's not a valid word")
 
     def end(self):
         """TODO:Keep stats in json file"""
