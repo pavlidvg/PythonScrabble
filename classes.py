@@ -90,7 +90,7 @@ class Computer(Player):
                 for word in itertools.permutations(self.letters,i):
                     word_as_str = ''.join(list(word))
                     if word_as_str in dictionary and dictionary[word_as_str]>value:
-                        print(word_as_str)
+                        #print(word_as_str)
                         best_word = word_as_str
                         value = dictionary[word_as_str]
             return best_word
@@ -106,8 +106,8 @@ class Human(Player):
         Player.play_word(self,word,sak)
 
 
-    def play(self,sak: SakClass):
-        """TODO: this method sohuld simulate how the player plays (e.g. inputs)"""
+    def play(self,word: str,sak: SakClass):
+        """TODO: this method should simulate how the player plays (e.g. inputs)"""
         print("play of human")
         print("Player:",self.name,self.letters)
         self.play_word("ONE",sak)
@@ -145,9 +145,17 @@ class Game:
         #DRAW INITIAL LETTERS
         self.player1.letters = self.sakoulaki.getletters(7)
         self.player2.letters = self.sakoulaki.getletters(7)
-        print(self.player2.letters)
+        print("player= ",self.player1.letters)
+        print("computer= ",self.player2.letters)
         WORD = self.player2.play(self.word_dictionary,2)
-        print(WORD)
+        print("computers choice is",WORD)
+        test_word = input("Πες λέξη:")
+
+        if test_word in self.word_dictionary:
+            print("valid word")
+        else:
+            print("not valid word")
+
     def end(self):
         """TODO:Keep stats in json file"""
         return "will save in the future"
@@ -161,7 +169,6 @@ if __name__ == "__main__":
     newgame = Game()
     newgame.setup()
     newgame.run()
-    test_word = input("pes leksi:")
     """
     x = SakClass()
     x.randomize_sak()
