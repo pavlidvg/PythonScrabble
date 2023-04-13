@@ -48,7 +48,7 @@ class Player:
         return 'Player:{0}, Score:{1}'.format(self.name, self.score)
 
     def play_word(self,word: str,sak: SakClass):
-            self.score += Game.scrabble_score(word)
+            self.score += Game.scrabble_score(word)#print the score
             for letter in word:
                 self.letters.remove(letter) #remove the letters from player
 
@@ -65,36 +65,39 @@ class Computer(Player):
     def play_word(self,word: str,sak: SakClass):
         Player.play_word(self,word,sak)
 
-    def play(self, dictionary,mode:  int = 0 ):
+    def play(self, dictionary,mode:  int = 2 ):
         """0 is MIN-letters, 1 is MAX-letters, anything else is the SMART algorithm"""
-        if mode==0: #MIN-Letters
+        if mode==1: #MIN-Letters mode 1
             for i in range(2,8):
                 for word in itertools.permutations(self.letters,i):
                     if ''.join(list(word)) in dictionary:
                         return ''.join(list(word))
         #END OF MIN-LETTERS
 
-        #MAX-LETTERS
-        elif mode==1:
+        #MAX-LETTERS mode 2
+        elif mode==2:
             for i in range(8,2,-1):
                 for word in itertools.permutations(self.letters,i):
                     if ''.join(list(word)) in dictionary:
                         return ''.join(list(word))
         #END OF MAX-LETTERS
 
-        #SMART
-        else:
+        #SMART mode 4
+        elif mode==4:
             best_word = ""
             value =0
             for i in range(8,2,-1):
                 for word in itertools.permutations(self.letters,i):
                     word_as_str = ''.join(list(word))
                     if word_as_str in dictionary and dictionary[word_as_str]>value:
-                        #print(word_as_str)
                         best_word = word_as_str
                         value = dictionary[word_as_str]
             return best_word
         #END OF SMART
+
+        #else: SMART-FAIL mode 3
+
+        #END OF SMART-FAIL
 
 
 class Human(Player):
@@ -102,21 +105,24 @@ class Human(Player):
     def __init__(self,name,score):
         Player.__init__(self,name,score)
     def play_word(self,dictionary,word: str,sak: SakClass):
-        """TODO: ASSUME PLAYER PLAYS CORRECTLY FOR NOW, CHECK DISTIONARY LATER"""
-        if word in dictionary:#DO:and the the player has the letters that he used
-            print("valid word")
-        else:
-            print("that's not a valid word")
         Player.play_word(self,word,sak)
 
 
     def play(self,dictionary,sak: SakClass):
-        """TODO: this method should simulate how the player plays (e.g. inputs)"""
         print("play of human")
         print("Player:",self.name,self.letters)
-        word = input("Πες λέξη:")
-        self.play_word(dictionary,word,sak)
-        print(self.letters)
+
+        while True:
+            word = input("Πες λέξη:")
+            if word in dictionary:#DO:and the the player has the letters that he used
+                print("valid word")
+                self.play_word(dictionary,word,sak)
+                break
+            elif word=="q":
+                print("the player wants to exit")#DO: find a way to exit
+                break
+            else:
+                print("that's not a valid word")
 
 
 class Game:
@@ -133,7 +139,7 @@ class Game:
         self.sakoulaki = SakClass()
         self.sakoulaki.randomize_sak()
         self.word_dictionary = {}
-        self.mode =0
+        self.mode =2
 
     def setup(self):
         dict = {}
@@ -146,15 +152,17 @@ class Game:
         self.word_dictionary = dict
 
     def run(self):
-        """TODO: ARTEMIS"""
+        """TODO: print score, add conditions to end the game,"""
         #DRAW INITIAL LETTERS
         self.player1.letters = self.sakoulaki.getletters(7)
         self.player2.letters = self.sakoulaki.getletters(7)
-        print("player= ",self.player1.letters)
-        print("computer= ",self.player2.letters)
-        WORD = self.player2.play(self.word_dictionary,2)
+        #while
+        print("player's letters= ",self.player1.letters)
+        print("computer's letters= ",self.player2.letters)
+        WORD = self.player2.play(self.word_dictionary,2)#2=the mode, replace it with self.mode
+        self.player2.play_word(WORD,self.sakoulaki)
         print("computers choice is",WORD)
-        #in play() for human
+        print("new computer's letters= ",self.player2.letters)
         self.player1.play(self.word_dictionary,self.sakoulaki)
 
 
@@ -167,10 +175,31 @@ class Game:
 
 if __name__ == "__main__":
 
-            # load file
-    newgame = Game()
-    newgame.setup()
-    newgame.run()
+    newgame = Game()#to vazoume afto ekei pou ksekinaei to paixnidi?
+    newgame.setup()#kai afto?
+    #name=input("Write your name\n") replace "matt" with the name
+    while True:
+        print("***** SCRABBLE *****\n--------------------\n1: Σκορ\n2: Ρυθμίσεις\n3: Παιχνίδι\nq: Έξοδος\n--------------------")
+        menou=input("Επίλεξε 1,2,3 ή q απο το μενού\n")
+        if menou=="1":#δεν υποστηρίζει switch case???
+                print("score:")#print player's score
+        elif menou=="2":
+            print("Δίαλεξε επίπεδο του υπολογιστή\n1:μέτριος\n2:καλός\n3:έξυπνος\n4:πανέξυπνος")
+            mode=input()#put the mode to self
+        elif menou=="3":
+                print("The game starts")
+                newgame.run()
+                break #ToDo:if the player presses "q" it comes back to the menou
+        elif menou=="q":
+                print("Έξοδος")
+                break
+        else:
+            print("Δεν υπάρχει αυτή η επιλογή. Επίλεξε 1,2,3 ή q απο το μενού")
+
+
+        # load file
+
+
     """
     x = SakClass()
     x.randomize_sak()
