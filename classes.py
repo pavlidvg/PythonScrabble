@@ -64,9 +64,8 @@ class Computer(Player):
 
     def play_word(self,word: str,sak: SakClass):
         Player.play_word(self,word,sak)
-        print("computers choice is",word)
-        print("Computer's score =", self.score)#printing the score
-
+        print("Computer: Διαθέσιμα Γράμματα",self.letters)#ToDo:hide computers letters
+        print("Λέξη:",word,"Βαθμοι:",Game.scrabble_score(word),"Σκορ: ",self.score)
     def play(self, dictionary,mode:  int = 2 ):
         """0 is MIN-letters, 1 is MAX-letters, anything else is the SMART algorithm"""
         #ToDo: check if it can create letter, else return "e"
@@ -124,16 +123,16 @@ class Human(Player):
 
 
     def play(self,dictionary,sak: SakClass):
-        print("play of human")
-        print("Player:",self.name,self.letters)
+        print("Παίκτης:",self.name,"Διαθέσιμα Γράμματα",self.letters, "Σκορ: ",self.score)
 
         while True:
-            word = input("Πες λέξη ή γράψε q για έξοδο ή γράψε p για pass\n")
+            print("Πες λέξη ή γράψε q για έξοδο ή γράψε p για pass:")
+            word=input("Λέξη: ")
             played=0
             if word=="q":
-                print("the player wants to exit")#DO: find a way to exit
+                print("Επιστροφή στο μενού")
                 break
-            elif word=="p":
+            elif word=="p":#ToDo:aftos leei kati allo gia to p???
                 print("the player wants to pass")
                 break
             elif word in dictionary:
@@ -142,15 +141,14 @@ class Human(Player):
                   if letter not in self.letters:#ToDo:it passes even if you use the same letter twice when you don't have it
                     notInList=1
                 if notInList==1:
-                    print("You don't have that letters")
+                    print("Δεν έχεις αυτά τα γράμματα")
                 else:
-                    print("valid word")
                     self.play_word(dictionary,word,sak)#ToDo: check if the sak has letters and he can play a valid word
-                    print("Player's score =", self.score)#printing the score
+                    print("Αποδεκτή Λέξη - Βαθμοί: ",Game.scrabble_score(word),"Σκορ: ",self.score)
                     played=1
                     break
             else:
-                print("that's not a valid word")
+                print("Μη αποδεκτή Λέξη")
         if played==0 and word!="p" and word!="q":
             return "e"
         else:
@@ -190,12 +188,12 @@ class Game:
         self.player1.letters = self.sakoulaki.getletters(7)
         self.player2.letters = self.sakoulaki.getletters(7)
         while True:
-            print("player's letters= ",self.player1.letters)
-            print("computer's letters= ",self.player2.letters)
+            print("--------------------")
             WORD = self.player2.play(self.word_dictionary,4)#ToDo:replace 4 with the actual mode or change it from menu
             if WORD=="e":#ToDo: make the computer return e when it can't create a word
                 break
             self.player2.play_word(WORD,self.sakoulaki)
+            print("--------------------")
             Word=self.player1.play(self.word_dictionary,self.sakoulaki)
             if Word=="e" or Word=="q":
                 break
