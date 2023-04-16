@@ -48,12 +48,12 @@ class Player:
         return 'Player:{0}, Score:{1}'.format(self.name, self.score)
 
     def play_word(self,word: str,sak: SakClass):
-            self.score += Game.scrabble_score(word)#print the score
+        #ToDo: check if the sak has letters
+            self.score += Game.scrabble_score(word)#updating score
             for letter in word:
                 self.letters.remove(letter) #remove the letters from player
 
             self.letters = self.letters + sak.getletters(len(word))#adding letters
-
 
 
 
@@ -64,9 +64,12 @@ class Computer(Player):
 
     def play_word(self,word: str,sak: SakClass):
         Player.play_word(self,word,sak)
+        print("computers choice is",word)
+        print("Computer's score =", self.score)#printing the score
 
     def play(self, dictionary,mode:  int = 2 ):
         """0 is MIN-letters, 1 is MAX-letters, anything else is the SMART algorithm"""
+        #ToDo: check if it can create letter, else return "e"
         if mode==1: #MIN-Letters mode 1
             for i in range(2,8):
                 for word in itertools.permutations(self.letters,i):
@@ -106,6 +109,7 @@ class Human(Player):
         Player.__init__(self,name,score)
     def play_word(self,dictionary,word: str,sak: SakClass):
         Player.play_word(self,word,sak)
+        #ToDo: check if the sak has letters. If it doesn't return "e"
 
 
     def play(self,dictionary,sak: SakClass):
@@ -113,16 +117,34 @@ class Human(Player):
         print("Player:",self.name,self.letters)
 
         while True:
-            word = input("Πες λέξη:")
-            if word in dictionary:#DO:and the the player has the letters that he used
-                print("valid word")
-                self.play_word(dictionary,word,sak)
-                break
-            elif word=="q":
+            word = input("Πες λέξη ή γράψε q για έξοδο ή γράψε p για pass\n")
+            played=0
+            if word=="q":
                 print("the player wants to exit")#DO: find a way to exit
                 break
+            elif word=="p":
+                print("the player wants to pass")
+                break
+            elif word in dictionary:
+                notInList=0
+                for letter in word:
+                  if letter not in self.letters:#ToDo:it passes even if you use the same letter twice when you don't have it
+                    notInList=1
+                if notInList==1:
+                    print("You don't have that letters")
+                else:
+                    print("valid word")
+                    self.play_word(dictionary,word,sak)#ToDo: check if the sak has letters
+                    print("Player's score =", self.score)#printing the score
+                    played=1
+                    break
             else:
                 print("that's not a valid word")
+        if played==0 and word!="p" and word!="q":
+            return "e"
+        else:
+            return word
+
 
 
 class Game:
@@ -152,18 +174,26 @@ class Game:
         self.word_dictionary = dict
 
     def run(self):
-        """TODO: print score, add conditions to end the game,"""
+        """TODO:add conditions to end the game,"""
         #DRAW INITIAL LETTERS
         self.player1.letters = self.sakoulaki.getletters(7)
         self.player2.letters = self.sakoulaki.getletters(7)
-        #while
-        print("player's letters= ",self.player1.letters)
-        print("computer's letters= ",self.player2.letters)
-        WORD = self.player2.play(self.word_dictionary,2)#2=the mode, replace it with self.mode
-        self.player2.play_word(WORD,self.sakoulaki)
-        print("computers choice is",WORD)
-        print("new computer's letters= ",self.player2.letters)
-        self.player1.play(self.word_dictionary,self.sakoulaki)
+        while True:
+            print("player's letters= ",self.player1.letters)
+            print("computer's letters= ",self.player2.letters)
+            WORD = self.player2.play(self.word_dictionary,2)#2=the mode, replace it with self.mode
+            if WORD=="e":#ToDo: make the computer return e when it can't create a word
+                break
+            self.player2.play_word(WORD,self.sakoulaki)
+            Word=self.player1.play(self.word_dictionary,self.sakoulaki)
+            if Word=="e" or Word=="q":
+                break
+
+        if WORD=="e":#if the computer can't create a word
+            return WORD
+        elif Word=="e" or Word=="q":#e=if the human can't create a word, "q"=quit the game and return to the menu
+            return Word
+        #ToDO:If the computer or the player returns "e", to other player keeps going until he also returns "e", or "q" for the human
 
 
     def end(self):
@@ -177,19 +207,22 @@ if __name__ == "__main__":
 
     newgame = Game()#to vazoume afto ekei pou ksekinaei to paixnidi?
     newgame.setup()#kai afto?
-    #name=input("Write your name\n") replace "matt" with the name
+    #ToDo: name=input("Write your name\n") replace "matt" with the name
     while True:
         print("***** SCRABBLE *****\n--------------------\n1: Σκορ\n2: Ρυθμίσεις\n3: Παιχνίδι\nq: Έξοδος\n--------------------")
         menou=input("Επίλεξε 1,2,3 ή q απο το μενού\n")
-        if menou=="1":#δεν υποστηρίζει switch case???
-                print("score:")#print player's score
+        if menou=="1":
+                print("score:")#ToDo:put the player's score
         elif menou=="2":
             print("Δίαλεξε επίπεδο του υπολογιστή\n1:μέτριος\n2:καλός\n3:έξυπνος\n4:πανέξυπνος")
-            mode=input()#put the mode to self
+            mode=input()#ToDo: set the self.mode
         elif menou=="3":
                 print("The game starts")
-                newgame.run()
-                break #ToDo:if the player presses "q" it comes back to the menou
+                end= newgame.run()
+                if end=="e":
+                    print("Game over")
+                elif end=="q":
+                    print("you press quit")
         elif menou=="q":
                 print("Έξοδος")
                 break
