@@ -33,7 +33,7 @@ class SakClass:
         self.num_letters -= num_letters  # remove the letters from the count
         ret = []  # list of letters that will be given
         for i in range(num_letters):
-            ret.append(self.bag.pop())
+            ret.append(self.bag.pop())#ToDo: check if you pop to an empty list
         return ret
 
 
@@ -98,8 +98,19 @@ class Computer(Player):
             return best_word
         #END OF SMART
 
-        #else: SMART-FAIL mode 3
-
+        #SMART-FAIL mode 3
+        elif mode==3: #ToDo: complete it, how to convert list to dictionary??
+            #START OF SMART
+            words={}
+            for i in range(8,2,-1):
+                for word in itertools.permutations(self.letters,i):
+                    word_as_str = ''.join(list(word))
+                    if word_as_str in dictionary:
+                       words[word_as_str]= dictionary[word_as_str]
+            #END OF SMART
+            sorted_words = sorted(words.items(), key=lambda x:x[1], reverse=True)
+            #sortedwords=dict(sorted_words) #convert list to dictionary
+            print(sorted_words)#ToDo:convert the list to dictionary and return the the word with value=(best value)-2
         #END OF SMART-FAIL
 
 
@@ -134,7 +145,7 @@ class Human(Player):
                     print("You don't have that letters")
                 else:
                     print("valid word")
-                    self.play_word(dictionary,word,sak)#ToDo: check if the sak has letters
+                    self.play_word(dictionary,word,sak)#ToDo: check if the sak has letters and he can play a valid word
                     print("Player's score =", self.score)#printing the score
                     played=1
                     break
@@ -161,7 +172,7 @@ class Game:
         self.sakoulaki = SakClass()
         self.sakoulaki.randomize_sak()
         self.word_dictionary = {}
-        self.mode =2
+        self.mode =4#ToDo:put default 1,2,3 or 4
 
     def setup(self):
         dict = {}
@@ -174,14 +185,14 @@ class Game:
         self.word_dictionary = dict
 
     def run(self):
-        """TODO:add conditions to end the game,"""
+        """TODO:add conditions to end the game"""
         #DRAW INITIAL LETTERS
         self.player1.letters = self.sakoulaki.getletters(7)
         self.player2.letters = self.sakoulaki.getletters(7)
         while True:
             print("player's letters= ",self.player1.letters)
             print("computer's letters= ",self.player2.letters)
-            WORD = self.player2.play(self.word_dictionary,2)#2=the mode, replace it with self.mode
+            WORD = self.player2.play(self.word_dictionary,4)#ToDo:replace 4 with the actual mode or change it from menu
             if WORD=="e":#ToDo: make the computer return e when it can't create a word
                 break
             self.player2.play_word(WORD,self.sakoulaki)
@@ -222,7 +233,7 @@ if __name__ == "__main__":
                 if end=="e":
                     print("Game over")
                 elif end=="q":
-                    print("you press quit")
+                    print("you pressed quit")
         elif menou=="q":
                 print("Έξοδος")
                 break
