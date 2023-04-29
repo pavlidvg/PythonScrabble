@@ -1,8 +1,21 @@
 import random
 import itertools
 import json
+import math
+
+#GLOBAL
+
+#load
+scoreboard = {"Vasilis":120,
+              "Artemis":131}
+with open("highscores.json","r") as loadfile:
+    scoreboard = json.load(loadfile)
+
+print(scoreboard)
+
+computer_mode = 1
 class SakClass:
-    """TODO: Η πληροφορία για το πόσα γράμματα παραμένουν στο σακουλάκι θα πρέπει να είναι γνωστή στον παίκτη. """
+
     greek_scrabble_info = {'Α': [12, 1], 'Β': [1, 8], 'Γ': [2, 4], 'Δ': [2, 4], 'Ε': [8, 1],
                 'Ζ': [1, 10], 'Η': [7, 1], 'Θ': [1, 10], 'Ι': [8, 1], 'Κ': [4, 2],
                 'Λ': [3, 3], 'Μ': [3, 3], 'Ν': [6, 1], 'Ξ': [1, 10], 'Ο': [9, 1],
@@ -30,11 +43,20 @@ class SakClass:
         self.randomize_sak()  # reshuffles list
 
     def getletters(self, num_letters):
-        self.num_letters -= num_letters  # remove the letters from the count
+        #print("requested:",num_letters)
         ret = []  # list of letters that will be given
-        for i in range(num_letters):
-            ret.append(self.bag.pop())#ToDo: check if you pop to an empty list
-        return ret
+        if self.num_letters >= num_letters:
+            #print("given")
+            self.num_letters -= num_letters  # remove the letters from the count
+            for i in range(num_letters):
+
+                ret.append(self.bag.pop())
+            return ret
+        else:
+            for i in range(self.num_letters):
+                ret.append(self.bag.pop())
+            self.num_letters = 0
+            return ret
 
 
 class Player:
@@ -48,12 +70,13 @@ class Player:
         return 'Player:{0}, Score:{1}'.format(self.name, self.score)
 
     def play_word(self,word: str,sak: SakClass):
-        #ToDo: check if the sak has letters
+
             self.score += Game.scrabble_score(word)#updating score
             for letter in word:
                 self.letters.remove(letter) #remove the letters from player
 
-            self.letters = self.letters + sak.getletters(len(word))#adding letters
+            if sak.num_letters>=len(word):
+                self.letters = self.letters + sak.getletters(len(word))#adding letters
 
 
 
@@ -61,31 +84,33 @@ class Player:
 class Computer(Player):
     def __init__(self):
         Player.__init__(self,"Υπολογιστής",0)
+        self.mode = 3
 
     def play_word(self,word: str,sak: SakClass):
         Player.play_word(self,word,sak)
-        print("Computer: Διαθέσιμα Γράμματα",self.letters)#ToDo:hide computers letters
+        print("Computer: Διαθέσιμα Γράμματα",self.letters)
         print("Λέξη:",word,"Βαθμοι:",Game.scrabble_score(word),"Σκορ: ",self.score)
-    def play(self, dictionary,mode:  int = 2 ):
-        """0 is MIN-letters, 1 is MAX-letters, anything else is the SMART algorithm"""
-        #ToDo: check if it can create letter, else return "e"
-        if mode==1: #MIN-Letters mode 1
+    def play(self, dictionary,mode:  int = 3 ):
+        """1 is MIN-letters, 2 is MAX-letters, anything else is the SMART algorithm"""
+        if self.mode==1: #MIN-Letters mode 1
             for i in range(2,8):
                 for word in itertools.permutations(self.letters,i):
                     if ''.join(list(word)) in dictionary:
                         return ''.join(list(word))
+            return "e"
         #END OF MIN-LETTERS
 
         #MAX-LETTERS mode 2
-        elif mode==2:
+        elif self.mode==2:
             for i in range(8,2,-1):
                 for word in itertools.permutations(self.letters,i):
                     if ''.join(list(word)) in dictionary:
                         return ''.join(list(word))
+            return "e"
         #END OF MAX-LETTERS
 
         #SMART mode 4
-        elif mode==4:
+        elif self.mode==4:
             best_word = ""
             value =0
             for i in range(8,2,-1):
@@ -94,11 +119,16 @@ class Computer(Player):
                     if word_as_str in dictionary and dictionary[word_as_str]>value:
                         best_word = word_as_str
                         value = dictionary[word_as_str]
+            print("best word:"+best_word)
+            if not best_word: #if the word is still empty
+                return "e"
+
             return best_word
+
         #END OF SMART
 
         #SMART-FAIL mode 3
-        elif mode==3: #ToDo: complete it, how to convert list to dictionary??
+        elif mode==3:
             #START OF SMART
             words={}
             for i in range(8,2,-1):
@@ -109,12 +139,22 @@ class Computer(Player):
             #END OF SMART
             sorted_words = sorted(words.items(), key=lambda x:x[1], reverse=True)
             #sortedwords=dict(sorted_words) #convert list to dictionary
-            print(sorted_words)#ToDo:convert the list to dictionary and return the the word with value=(best value)-2
+
+
+            if len(sorted_words) > 1:
+                for i in range(len(sorted_words)-1): #loop through every word, starting from the best
+                    if random.randint(1,10) > 5:
+                        return sorted_words[i] #you have a 50% chance of palying this word and stopping the algorithm
+                return sorted_words[len(sorted_words)] #play the worst word, if you got unlucky
+            else:
+                try:
+                    return sorted_words[0] #play the only playable word
+                except:
+                    return "e" #play if no word exists
         #END OF SMART-FAIL
 
 
 class Human(Player):
-
     def __init__(self,name,score):
         Player.__init__(self,name,score)
     def play_word(self,dictionary,word: str,sak: SakClass):
@@ -132,18 +172,34 @@ class Human(Player):
             if word=="q":
                 print("Επιστροφή στο μενού")
                 break
-            elif word=="p":#ToDo:aftos leei kati allo gia to p???
-                print("the player wants to pass")
-                break
+            elif word=="p":
+                return "p"
             elif word in dictionary:
-                notInList=0
-                for letter in word:
-                  if letter not in self.letters:#ToDo:it passes even if you use the same letter twice when you don't have it
-                    notInList=1
-                if notInList==1:
-                    print("Δεν έχεις αυτά τα γράμματα")
+                playable = True
+                word = str(word)
+                print(word)
+                try:
+                    testlist = []
+                    testlist2 = self.letters.copy()
+
+                    for letter in word:
+                        if letter in testlist2:
+                            testlist2.remove(letter)
+
+                        else:
+                            playable = False
+
+                        #if there was an error,next two lines won't execute
+
+
+                except:
+                    #if there was an error, you dont have the letters
+                    playable = False
+
+                if not playable:
+                    print("Δεν έχετε τα γράμματα για αυτή  την λέξη")
                 else:
-                    self.play_word(dictionary,word,sak)#ToDo: check if the sak has letters and he can play a valid word
+                    self.play_word(dictionary,word,sak)
                     print("Αποδεκτή Λέξη - Βαθμοί: ",Game.scrabble_score(word),"Σκορ: ",self.score)
                     played=1
                     break
@@ -160,19 +216,27 @@ class Game:
     @staticmethod
     def scrabble_score(word:str):
         score = 0
+        word = str(word)
         for letter in word:
-            score += SakClass.greek_scrabble_info[letter][1]
+            try:
+                score += SakClass.greek_scrabble_info[letter][1]
+            except:
+                score+=1
+                print("A word with a non greek letter appeared:",letter)
+
+
 
         return score
-    def __init__(self):
-        self.player1 = Human("matt",0)
+    def __init__(self,name):
+        self.player1 = Human(name,0)
         self.player2= Computer()
         self.sakoulaki = SakClass()
         self.sakoulaki.randomize_sak()
         self.word_dictionary = {}
-        self.mode =4#ToDo:put default 1,2,3 or 4
+
 
     def setup(self):
+
         dict = {}
         # OPEN FILE AND LOAD WORDS IN DICT
 
@@ -182,52 +246,111 @@ class Game:
                     {line.strip(): self.scrabble_score(line.strip())})  # add each word along with its scrabble value
         self.word_dictionary = dict
 
+
     def run(self):
         """TODO:add conditions to end the game"""
         #DRAW INITIAL LETTERS
         self.player1.letters = self.sakoulaki.getletters(7)
         self.player2.letters = self.sakoulaki.getletters(7)
         while True:
+
+            #PLAYER2
             print("--------------------")
-            WORD = self.player2.play(self.word_dictionary,4)#ToDo:replace 4 with the actual mode or change it from menu
-            if WORD=="e":#ToDo: make the computer return e when it can't create a word
-                break
-            self.player2.play_word(WORD,self.sakoulaki)
+            WORD = self.player2.play(self.word_dictionary,self.player2.mode)
+            if WORD=="e":
+                self.sakoulaki.putbackletters(self.player2.letters)
+                if self.sakoulaki.num_letters >= 7:
+
+                    self.player2.letters = self.sakoulaki.getletters(7)
+                else:
+                    self.end()
+                    return
+            else:
+                self.player2.play_word(WORD,self.sakoulaki)
+                if len(WORD) > self.sakoulaki.num_letters:
+                    self.end()
+                    return
+            print("Γράμμματα που έμειναν στο σακουλάκι:",self.sakoulaki.num_letters)
             print("--------------------")
+
+           #PLAYER1
             Word=self.player1.play(self.word_dictionary,self.sakoulaki)
             if Word=="e" or Word=="q":
                 break
+            if Word == "p":
+                if self.sakoulaki.num_letters <7:
+                    self.end()
+                    return
+                self.sakoulaki.putbackletters(self.player1.letters)
+                self.player1.letters = self.sakoulaki.getletters(7)
+            print("Γράμματα που έμειναν στο σακουλάκι:", self.sakoulaki.num_letters)
+            if self.sakoulaki.num_letters<len(Word):
+                self.end()
+                return
 
-        if WORD=="e":#if the computer can't create a word
-            return WORD
-        elif Word=="e" or Word=="q":#e=if the human can't create a word, "q"=quit the game and return to the menu
+
+        if Word=="e" or Word=="q":#e=if the human can't create a word, "q"=quit the game and return to the menu
             return Word
-        #ToDO:If the computer or the player returns "e", to other player keeps going until he also returns "e", or "q" for the human
+
+
+
 
 
     def end(self):
+        print("---------")
+        print("Τέλος παιχνιδιου")
+        print("---------")
+        full_score = self.player1.score
         """TODO:Keep stats in json file"""
+        if self.player1.score>self.player2.score:
+            print("Κέρδισες τον Υπολογιστή!")
+            full_score= full_score + (full_score * (self.player2.mode/10))
+        try:
+            if scoreboard[self.player1.name]<full_score: #if the player got a new highscore
+                scoreboard[self.player1.name] = full_score #update the leaderboard, else do nothing
+        except:
+            scoreboard[self.player1.name] = full_score #if this name doesn't exist, add it on the leaderboard
+
+        open("highscores.json","w").close() #delete previous file contents
+        with open("highscores.json","w") as save:
+            json.dump(scoreboard,save)
+
         return "will save in the future"
+    def replay(self):
+        """Runs all resets in order for a new game to be played"""
+        self.sakoulaki = SakClass()
+        self.player1.score = self.player2.score = 0
 
 
 #MAIN KAI KALA
 
 if __name__ == "__main__":
 
-    newgame = Game()#to vazoume afto ekei pou ksekinaei to paixnidi?
+    player_name = input("Δώστε το όνομα του παίκτηα σας. Αν είχατε παίξει παλαιότερα με άλλο όνομα, μπορείτε να το χρησιμοποιήσετε για να προσπεράσετε τα σκορ σας:")
+
+    newgame = Game(player_name)#to vazoume afto ekei pou ksekinaei to paixnidi?
     newgame.setup()#kai afto?
-    #ToDo: name=input("Write your name\n") replace "matt" with the name
+
     while True:
         print("***** SCRABBLE *****\n--------------------\n1: Σκορ\n2: Ρυθμίσεις\n3: Παιχνίδι\nq: Έξοδος\n--------------------")
         menou=input("Επίλεξε 1,2,3 ή q απο το μενού\n")
         if menou=="1":
-                print("score:")#ToDo:put the player's score
+            try:
+                print("Highscore:",scoreboard[player_name])
+            except:
+                print("Highscore:0")
         elif menou=="2":
-            print("Δίαλεξε επίπεδο του υπολογιστή\n1:μέτριος\n2:καλός\n3:έξυπνος\n4:πανέξυπνος")
-            mode=input()#ToDo: set the self.mode
+            print("Διάλεξε επίπεδο του υπολογιστή\n1:MIN\n2:MAX\n3:SMART-FAIL\n4:SMART\n Παίρνεις περισσότερους πόντους, όσο μεγαλύτερο mode διαλέξεις, αλλά μόνο αν κερδίσεις!\nmode:")
+            mode=input()
+            try:
+                newgame.player2.mode = int(mode)
+            except:
+                newgame.player2.mode = 3
+                print("Λανθασμένη ένδειξη. Επιλέχθηκε ο αλγόριθμος SMART-FAIL για την καλύτερη εμπειρία παιχνιδιού")
         elif menou=="3":
                 print("The game starts")
                 end= newgame.run()
+                newgame.replay()
                 if end=="e":
                     print("Game over")
                 elif end=="q":
