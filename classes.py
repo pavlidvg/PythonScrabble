@@ -10,7 +10,7 @@ scoreboard = {"Vasilis":120,
               "Artemis":131}
 with open("highscores.json","r") as loadfile:
     scoreboard = json.load(loadfile)
-
+print("HIGHSCORES ΠΑΙΚΤΩΝ:")
 print(scoreboard)
 
 computer_mode = 1
@@ -87,8 +87,9 @@ class Computer(Player):
         self.mode = 3
 
     def play_word(self,word: str,sak: SakClass):
-        Player.play_word(self,word,sak)
+
         print("Computer: Διαθέσιμα Γράμματα",self.letters)
+        Player.play_word(self, word, sak)
         print("Λέξη:",word,"Βαθμοι:",Game.scrabble_score(word),"Σκορ: ",self.score)
     def play(self, dictionary,mode:  int = 3 ):
         """1 is MIN-letters, 2 is MAX-letters, anything else is the SMART algorithm"""
@@ -128,7 +129,7 @@ class Computer(Player):
         #END OF SMART
 
         #SMART-FAIL mode 3
-        elif mode==3:
+        elif self.mode==3:
             #START OF SMART
             words={}
             for i in range(8,2,-1):
@@ -143,12 +144,13 @@ class Computer(Player):
 
             if len(sorted_words) > 1:
                 for i in range(len(sorted_words)-1): #loop through every word, starting from the best
+                    #print("checking ",sorted_words[i])
                     if random.randint(1,10) > 5:
-                        return sorted_words[i] #you have a 50% chance of palying this word and stopping the algorithm
-                return sorted_words[len(sorted_words)] #play the worst word, if you got unlucky
+                        return sorted_words[i][0] #you have a 50% chance of palying this word and stopping the algorithm
+                return sorted_words[len(sorted_words)[0]] #play the worst word, if you got unlucky
             else:
                 try:
-                    return sorted_words[0] #play the only playable word
+                    return sorted_words[0][0] #play the only playable word
                 except:
                     return "e" #play if no word exists
         #END OF SMART-FAIL
@@ -340,7 +342,7 @@ if __name__ == "__main__":
             except:
                 print("Highscore:0")
         elif menou=="2":
-            print("Διάλεξε επίπεδο του υπολογιστή\n1:MIN\n2:MAX\n3:SMART-FAIL\n4:SMART\n Παίρνεις περισσότερους πόντους, όσο μεγαλύτερο mode διαλέξεις, αλλά μόνο αν κερδίσεις!\nmode:")
+            print("Διάλεξε επίπεδο του υπολογιστή\n1:MIN\n2:MAX\n3:SMART-FAIL(50% να χάσει μία λέξη)\n4:SMART\n Παίρνεις περισσότερους πόντους, όσο μεγαλύτερο mode διαλέξεις, αλλά μόνο αν κερδίσεις!\nmode:")
             mode=input()
             try:
                 newgame.player2.mode = int(mode)
