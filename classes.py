@@ -45,17 +45,20 @@ class SakClass:
     def getletters(self, num_letters):
         #print("requested:",num_letters)
         ret = []  # list of letters that will be given
-        if self.num_letters >= num_letters:
+        if self.num_letters >= num_letters and len(self.bag)>= num_letters:
             #print("given")
             self.num_letters -= num_letters  # remove the letters from the count
             for i in range(num_letters):
 
                 ret.append(self.bag.pop())
+            self.num_letters = len(self.bag)
+            print("AFTER PLAY",len(self.bag))
             return ret
         else:
-            for i in range(self.num_letters):
+            for i in range(len(self.bag)):
                 ret.append(self.bag.pop())
             self.num_letters = 0
+            print("AFTER PLAY", len(self.bag))
             return ret
 
 
@@ -139,6 +142,7 @@ class Computer(Player):
                        words[word_as_str]= dictionary[word_as_str]
             #END OF SMART
             sorted_words = sorted(words.items(), key=lambda x:x[1], reverse=True)
+
             #sortedwords=dict(sorted_words) #convert list to dictionary
 
 
@@ -147,11 +151,12 @@ class Computer(Player):
                     #print("checking ",sorted_words[i])
                     if random.randint(1,10) > 5:
                         return sorted_words[i][0] #you have a 50% chance of palying this word and stopping the algorithm
-                return sorted_words[len(sorted_words)[0]] #play the worst word, if you got unlucky
+                return sorted_words[len(sorted_words)][0] #play the worst word, if you got unlucky
             else:
                 try:
                     return sorted_words[0][0] #play the only playable word
                 except:
+                    print("O Υπολογιστής δεν βρήκε κάποια λέξη με τα γράμματά του")
                     return "e" #play if no word exists
         #END OF SMART-FAIL
 
@@ -328,7 +333,7 @@ class Game:
 
 if __name__ == "__main__":
 
-    player_name = input("Δώστε το όνομα του παίκτηα σας. Αν είχατε παίξει παλαιότερα με άλλο όνομα, μπορείτε να το χρησιμοποιήσετε για να προσπεράσετε τα σκορ σας:")
+    player_name = input("Δώστε το όνομα του παίκτη σας. Αν είχατε παίξει παλαιότερα με άλλο όνομα, μπορείτε να το χρησιμοποιήσετε για να προσπεράσετε τα σκορ σας:")
 
     newgame = Game(player_name)#to vazoume afto ekei pou ksekinaei to paixnidi?
     newgame.setup()#kai afto?
