@@ -17,10 +17,10 @@ computer_mode = 1
 class SakClass:
 
     greek_scrabble_info = {'Α': [12, 1], 'Β': [1, 8], 'Γ': [2, 4], 'Δ': [2, 4], 'Ε': [8, 1],
-                'Ζ': [1, 10], 'Η': [7, 1], 'Θ': [1, 10], 'Ι': [8, 1], 'Κ': [4, 2],
-                'Λ': [3, 3], 'Μ': [3, 3], 'Ν': [6, 1], 'Ξ': [1, 10], 'Ο': [9, 1],
-                'Π': [4, 2], 'Ρ': [5, 2], 'Σ': [7, 1], 'Τ': [8, 1], 'Υ': [4, 2],
-                'Φ': [1, 8], 'Χ': [1, 8], 'Ψ': [1, 10], 'Ω': [3, 3]
+                           'Ζ': [1, 10], 'Η': [7, 1], 'Θ': [1, 10], 'Ι': [8, 1], 'Κ': [4, 2],
+                           'Λ': [3, 3], 'Μ': [3, 3], 'Ν': [6, 1], 'Ξ': [1, 10], 'Ο': [9, 1],
+                           'Π': [4, 2], 'Ρ': [5, 2], 'Σ': [7, 1], 'Τ': [8, 1], 'Υ': [4, 2],
+                           'Φ': [1, 8], 'Χ': [1, 8], 'Ψ': [1, 10], 'Ω': [3, 3]
                            }
 
     def __init__(self):
@@ -46,19 +46,17 @@ class SakClass:
         #print("requested:",num_letters)
         ret = []  # list of letters that will be given
         if self.num_letters >= num_letters and len(self.bag)>= num_letters:
-            #print("given")
             self.num_letters -= num_letters  # remove the letters from the count
             for i in range(num_letters):
-
                 ret.append(self.bag.pop())
             self.num_letters = len(self.bag)
-            print("AFTER PLAY",len(self.bag))
+            #print("AFTER PLAY",len(self.bag))
             return ret
         else:
             for i in range(len(self.bag)):
                 ret.append(self.bag.pop())
             self.num_letters = 0
-            print("AFTER PLAY", len(self.bag))
+            #print("AFTER PLAY", len(self.bag))
             return ret
 
 
@@ -74,12 +72,12 @@ class Player:
 
     def play_word(self,word: str,sak: SakClass):
 
-            self.score += Game.scrabble_score(word)#updating score
-            for letter in word:
-                self.letters.remove(letter) #remove the letters from player
+        self.score += Game.scrabble_score(word)#updating score
+        for letter in word:
+            self.letters.remove(letter) #remove the letters from player
 
-            if sak.num_letters>=len(word):
-                self.letters = self.letters + sak.getletters(len(word))#adding letters
+        if sak.num_letters>=len(word):
+            self.letters = self.letters + sak.getletters(len(word))#adding letters
 
 
 
@@ -123,7 +121,7 @@ class Computer(Player):
                     if word_as_str in dictionary and dictionary[word_as_str]>value:
                         best_word = word_as_str
                         value = dictionary[word_as_str]
-            print("best word:"+best_word)
+            #print("best word:"+best_word)
             if not best_word: #if the word is still empty
                 return "e"
 
@@ -139,7 +137,7 @@ class Computer(Player):
                 for word in itertools.permutations(self.letters,i):
                     word_as_str = ''.join(list(word))
                     if word_as_str in dictionary:
-                       words[word_as_str]= dictionary[word_as_str]
+                        words[word_as_str]= dictionary[word_as_str]
             #END OF SMART
             sorted_words = sorted(words.items(), key=lambda x:x[1], reverse=True)
 
@@ -255,7 +253,7 @@ class Game:
 
 
     def run(self):
-        """TODO:add conditions to end the game"""
+
         #DRAW INITIAL LETTERS
         self.player1.letters = self.sakoulaki.getletters(7)
         self.player2.letters = self.sakoulaki.getletters(7)
@@ -280,7 +278,7 @@ class Game:
             print("Γράμμματα που έμειναν στο σακουλάκι:",self.sakoulaki.num_letters)
             print("--------------------")
 
-           #PLAYER1
+            #PLAYER1
             Word=self.player1.play(self.word_dictionary,self.sakoulaki)
             if Word=="e" or Word=="q":
                 break
@@ -308,10 +306,13 @@ class Game:
         print("Τέλος παιχνιδιου")
         print("---------")
         full_score = self.player1.score
-        """TODO:Keep stats in json file"""
         if self.player1.score>self.player2.score:
             print("Κέρδισες τον Υπολογιστή!")
             full_score= full_score + (full_score * (self.player2.mode/10))
+        elif self.player1.score<self.player2.score:
+            print("Κέρδισε ο Υπολογιστής :(")
+        else:
+            print("Είστε ισοπαλία")
         try:
             if scoreboard[self.player1.name]<full_score: #if the player got a new highscore
                 scoreboard[self.player1.name] = full_score #update the leaderboard, else do nothing
@@ -355,16 +356,16 @@ if True:
                 newgame.player2.mode = 3
                 print("Λανθασμένη ένδειξη. Επιλέχθηκε ο αλγόριθμος SMART-FAIL για την καλύτερη εμπειρία παιχνιδιού")
         elif menou=="3":
-                print("The game starts")
-                end= newgame.run()
-                newgame.replay()
-                if end=="e":
-                    print("Game over")
-                elif end=="q":
-                    print("you pressed quit")
+            print("The game starts")
+            end= newgame.run()
+            newgame.replay()
+            if end=="e":
+                print("Game over")
+            elif end=="q":
+                print("you pressed quit")
         elif menou=="q":
-                print("Έξοδος")
-                break
+            print("Έξοδος")
+            break
         else:
             print("Δεν υπάρχει αυτή η επιλογή. Επίλεξε 1,2,3 ή q απο το μενού")
 
